@@ -8,19 +8,39 @@ function threeway_merge($left, $right, $origin)
 	foreach ($c as $key => $items) {
 		switch ($key) {
 			case "-":
-				foreach($items as $key => $value) {
-					unset($origin[$key]);
-				}
+				threeway_merge_remove($items, $origin);
 				break;
 			case "+":
-				foreach($items as $key => $value) {
-					$origin[$key] = $value;
-				}
+				threeway_merge_add($items, $origin);
 				break;
 		}
 	}
 	
 	return $origin;
+}
+
+function threeway_merge_add($items, &$origin)
+{
+	foreach($items as $key => $value) {
+		if(is_array($value)) {
+			$tmp = &$origin[$key];
+			threeway_merge_add($items[$key],$tmp);
+		} else {
+			$origin[$key] = $value;
+		}
+	}
+}
+
+function threeway_merge_remove($items, &$origin)
+{
+	foreach($items as $key => $value) {
+		if(is_array($value)) {
+			$tmp = &$origin[$key];
+			threeway_merge_remove($items[$key],$tmp);
+		} else {
+			unset($origin[$key]);
+		}
+	}
 }
 
 function hash_diff($array1, $array2, $strict = false) {
